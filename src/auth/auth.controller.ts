@@ -19,9 +19,8 @@ export class AuthController {
     return this.authService.login(req);
   }
 
-  @Post('signup')
+  @Post("signup")
   signup(@Body() createUsersDto: CreateUsersDto) {
-    const user = this.usersService.create(createUsersDto);
-    return user
+    return this.usersService.create(createUsersDto);
   }
 }

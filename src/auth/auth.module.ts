@@ -17,6 +17,6 @@ import { JwtConfigFactory } from "@/config/jwt.config";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy, JwtConfigFactory]
+  providers: [AuthService, JwtStrategy, LocalStrategy, JwtConfigFactory],
 })
 export class AuthModule {}

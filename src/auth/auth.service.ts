@@ -1,4 +1,4 @@
-import { compare, hash } from "@/common/hash/hash";
+import { compare } from "@/common/hash/hash";
 import { User } from "@/users/entities/users.entity";
 import { UsersService } from "@/users/users.service";
 import { Injectable } from "@nestjs/common";
@@ -17,6 +17,7 @@ export class AuthService {
       select: { password: true, username: true, id: true },
     });
     if (user && (await compare(pass, user.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
       return result;
     }
