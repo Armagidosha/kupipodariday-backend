@@ -1,5 +1,7 @@
 import { DefaultEntity } from "@/common/entities/defEntity";
-import { Exclude } from "class-transformer";
+import { Offer } from "@/offers/entities/offer.entity";
+import { Wish } from "@/wish/entities/wish.entity";
+import { Wishlist } from "@/wishlist/entities/wishlist.entity";
 import {
   IsEmail,
   IsOptional,
@@ -8,7 +10,7 @@ import {
   MinLength,
   ValidateIf,
 } from "class-validator";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity()
 export class User extends DefaultEntity {
@@ -17,8 +19,8 @@ export class User extends DefaultEntity {
   @MaxLength(30)
   username: string;
 
-  @Column({ default: "Пока ничего не рассказал о себе" },)
-  @ValidateIf(o => o.about !== '')
+  @Column({ default: "Пока ничего не рассказал о себе" })
+  @ValidateIf((obj) => obj.about !== "")
   @IsOptional()
   @Length(2, 200)
   about: string;
@@ -35,12 +37,12 @@ export class User extends DefaultEntity {
   @MinLength(8)
   password: string;
 
-  // @OneToMany(() => Wish, (wish) => wish.user)
-  wishes: string[] = [];
+  @OneToMany(() => Wish, (wish) => wish.owner)
+  wishes: Wish[];
 
-  // @OneToMany(() => Offer, (offer) => offer.user)
-  offers: string[] = [];
+  @OneToMany(() => Offer, (offer) => offer.user)
+  offers: Offer[];
 
-  // @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
-  wishlists: string[] = [];
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.owner)
+  wishlists: Wishlist;
 }

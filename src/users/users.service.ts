@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUsersDto } from "./dto/create-user.dto";
-import { Repository } from "typeorm";
+import { FindManyOptions, QueryFailedError, Repository } from "typeorm";
 import { User } from "./entities/users.entity";
 import { hash } from "@/common/hash/hash";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -14,19 +14,28 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUsersDto) {
-    const { password, ...user } = await this.usersRepository.save({
-      ...createUserDto,
-      password: await hash(createUserDto.password),
-    });
-    return user;
+    try {
+      //eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...user } = await this.usersRepository.save({
+        ...createUserDto,
+        password: await hash(createUserDto.password),
+      });
+      return user;
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw new ConflictException(
+          "Пользователь с таким именем или почтовым адресом уже существует",
+        );
+      }
+    }
   }
 
-  async findMany(query: unknown) {
-    return await this.usersRepository.find(query);
+  async findMany(params: FindManyOptions<User>) {
+    return await this.usersRepository.find(params);
   }
 
-  async findOne(params: unknown) {
-    return await this.usersRepository.findOneOrFail(params);
+  async findOne(params: FindManyOptions<User>) {
+    return await this.usersRepository.findOne(params);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
