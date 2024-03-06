@@ -1,6 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DataSource, Repository } from "typeorm";
+import { DataSource, EntityNotFoundError, FindManyOptions, Repository } from "typeorm";
 import { CreateWishesDto } from "./dto/createWishes.dto";
 import { UpdateWishesDto } from "./dto/updateWishes.dto";
 import { Wish } from "./entities/wish.entity";
@@ -21,7 +25,6 @@ export class WishesService {
       ...createWishesDto,
       owner: { id: userId },
     });
-    console.log(wish);
     return wish;
   }
 
@@ -50,36 +53,44 @@ export class WishesService {
 
       await queryRunner.commitTransaction();
       return newWish;
-    } catch (err) {
+    } catch (error) {
       await queryRunner.rollbackTransaction();
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException("Подарок не найден");
+      }
     } finally {
       await queryRunner.release();
     }
   }
 
-  async findOne(params: unknown) {
-    return this.wishesRepository.findOneOrFail(params);
+  async findOne(params: FindManyOptions<Wish>) {
+    try {
+      return await this.wishesRepository.findOneOrFail(params);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException("Подарок не найден");
+      }
+    }
   }
 
-  async findMany(params: unknown) {
-    return this.wishesRepository.find(params);
+  async findMany(params: FindManyOptions<Wish>) {
+    return await this.wishesRepository.find(params);
   }
 
   async update(userId: number, wishId: number, updateWishDto: UpdateWishesDto) {
+    console.log(userId, wishId, updateWishDto);
     const wish = await this.wishesRepository.findOneOrFail({
       where: { id: wishId },
       relations: { offers: true, owner: true },
     });
 
-    if (userId !== wish.owner.id) {
-      // TODO: ТУТА ТОЖЕ ЭРРОРА
-      return "error";
-    }
+    if (userId !== wish.owner.id)
+      throw new ForbiddenException("Нельзя редактировать чужие подарки");
 
-    if (wish.offers.length) {
-      //  TODO: ТУТА ТОЖЕ ЭРРОРА
-      return "error2";
-    }
+    if (wish.offers.length)
+      throw new ForbiddenException(
+        "Нельзя редактировать подарки с пожертвованиями",
+      );
     return await this.wishesRepository.update(wishId, updateWishDto);
   }
 
@@ -90,7 +101,8 @@ export class WishesService {
         owner: true,
       },
     });
-    if (userId !== wish.owner.id) return; // TODO! ДОБАВИТь ЭРРОР
+    if (userId !== wish.owner.id)
+      throw new ForbiddenException("Нельзя удалить чужие подарки");
     return this.wishesRepository.delete(wishId);
   }
 }

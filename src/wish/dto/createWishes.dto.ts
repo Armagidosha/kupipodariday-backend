@@ -1,4 +1,4 @@
-import { PartialType, PickType } from "@nestjs/swagger";
+import { PickType } from "@nestjs/swagger";
 import { Wish } from "../entities/wish.entity";
 
 export class CreateWishesDto extends PickType(Wish, [

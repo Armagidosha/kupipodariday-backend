@@ -22,7 +22,6 @@ export class WishesController {
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@UserReq() { id }: User, @Body() createWishesDto: CreateWishesDto) {
-    console.log(id);
     return this.wishesService.create(id, createWishesDto);
   }
 
@@ -48,18 +47,13 @@ export class WishesController {
 
   @UseGuards(JwtAuthGuard)
   @Get(":id")
-  getById(@Param("id") id: string) {
+  getOne(@Param("id") id: number) {
     return this.wishesService.findOne({
-      // TODO! НАЛАДИТЬ ОТНОШЕНИЯ
       where: { id },
       relations: {
         owner: true,
-        // offers: {
-        //   user: {},
-        //   wishes: true,
-        //   offers: true,
-        // },
-      },
+        offers: true
+      }
     });
   }
 
