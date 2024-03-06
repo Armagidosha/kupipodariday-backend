@@ -7,7 +7,7 @@ export default () => ({
   },
   jwt: {
     secret: process.env.JWTSECRET,
-    ttl: process.env.TTL + 'd',
+    ttl: process.env.TTL + "d",
   },
   host: {
     port: parseInt(process.env.PORT) || 5432,
