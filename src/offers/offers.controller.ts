@@ -20,7 +20,6 @@ export class OffersController {
 
   @Get(":id")
   getOne(@Param("id") id: number) {
-    console.log("getOne");
     return this.offersService.findOne({
       where: { id },
       relations: {

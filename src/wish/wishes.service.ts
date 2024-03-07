@@ -78,7 +78,6 @@ export class WishesService {
   }
 
   async update(userId: number, wishId: number, updateWishDto: UpdateWishesDto) {
-    console.log(userId, wishId, updateWishDto);
     const wish = await this.wishesRepository.findOneOrFail({
       where: { id: wishId },
       relations: { offers: true, owner: true },

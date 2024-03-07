@@ -35,11 +35,10 @@ export class OffersService {
         throw new ForbiddenException(
           "Нельзя пожертвовать больше, чем нужно собрать",
         );
-      const wishes = await queryRunner.manager.update(Wish, itemId, {
+      await queryRunner.manager.update(Wish, itemId, {
         raised: wish.raised + createOfferDto.amount,
       });
-      console.log(wishes);
-      console.log(amount, hidden, itemId, id);
+
       await queryRunner.commitTransaction();
       return await queryRunner.manager.save(Offer, {
         amount,
@@ -49,7 +48,7 @@ export class OffersService {
       });
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error
+      throw error;
     } finally {
       queryRunner.release();
     }
