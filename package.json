@@ -1,8 +1,8 @@
 {
   "name": "kupipodariday",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Бэк сервиса вишлистов",
+  "author": "Владимир З (Armagidosha)",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
