@@ -13,6 +13,7 @@ import { CreateWishlistDto } from "./dto/createWishlist.dto";
 import { JwtAuthGuard } from "@/auth/guard/jwt.guard";
 import { UserReq } from "@/common/decorators/user.decorator";
 import { User } from "@/users/entities/users.entity";
+import { UpdateWishlistDto } from "./dto/updateWishlist.dto";
 
 @UseGuards(JwtAuthGuard)
 @Controller("wishlistlists")
@@ -21,7 +22,12 @@ export class WishlistsController {
 
   @Get()
   getWishlists() {
-    return this.wishlistsService.getAll();
+    return this.wishlistsService.getAll({
+      relations: {
+        items: true,
+        owner: true,
+      },
+    });
   }
 
   @Post()
@@ -44,7 +50,13 @@ export class WishlistsController {
   }
 
   @Patch(":id")
-  updateWishlist() {}
+  updateWishlist(
+    @Param("id") wishlistId: number,
+    @UserReq() { id }: User,
+    @Body() updateWishlistDto: UpdateWishlistDto,
+  ) {
+    return this.wishlistsService.update(wishlistId, id, updateWishlistDto);
+  }
 
   @Delete(":id")
   deleteWishlist(@Param("id") wishlistId: number, @UserReq() { id }: User) {

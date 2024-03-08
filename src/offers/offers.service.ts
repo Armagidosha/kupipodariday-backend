@@ -15,14 +15,14 @@ export class OffersService {
     private wishesService: WishesService,
   ) {}
 
-  async create(id: number, createOfferDto: CreateOfferDto) {
+  async create(id: number, createOfferDto: CreateOfferDto): Promise<Offer> {
     const { amount, hidden, itemId } = createOfferDto;
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const wish = await this.wishesService.findOne({
-        where: { id: createOfferDto.itemId },
+        where: { id: itemId },
         relations: {
           owner: true,
         },
@@ -31,12 +31,13 @@ export class OffersService {
         throw new ForbiddenException(
           "Нельзя вносить деньги в свои пожертвования",
         );
-      if (wish.raised + createOfferDto.amount > wish.price)
+
+      if (wish.raised + amount > wish.price)
         throw new ForbiddenException(
-          "Нельзя пожертвовать больше, чем нужно собрать",
+          `Нельзя пожертвовать больше, чем ${wish.price - wish.raised}₽`,
         );
       await queryRunner.manager.update(Wish, itemId, {
-        raised: wish.raised + createOfferDto.amount,
+        raised: wish.raised + amount,
       });
 
       await queryRunner.commitTransaction();
@@ -54,11 +55,11 @@ export class OffersService {
     }
   }
 
-  findOne(params: FindManyOptions<Offer>) {
+  findOne(params: FindManyOptions<Offer>): Promise<Offer> {
     return this.offersRepository.findOneOrFail(params);
   }
 
-  findAll(params: FindManyOptions<Offer>) {
+  findAll(params: FindManyOptions<Offer>): Promise<Offer[]> {
     return this.offersRepository.find(params);
   }
 }

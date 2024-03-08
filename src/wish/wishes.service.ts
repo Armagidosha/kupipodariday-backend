@@ -4,7 +4,14 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DataSource, EntityNotFoundError, FindManyOptions, Repository } from "typeorm";
+import {
+  DataSource,
+  DeleteResult,
+  EntityNotFoundError,
+  FindManyOptions,
+  Repository,
+  UpdateResult,
+} from "typeorm";
 import { CreateWishesDto } from "./dto/createWishes.dto";
 import { UpdateWishesDto } from "./dto/updateWishes.dto";
 import { Wish } from "./entities/wish.entity";
@@ -28,7 +35,7 @@ export class WishesService {
     return wish;
   }
 
-  async copy(wishId: number, userId: number) {
+  async copy(wishId: number, userId: number): Promise<Wish> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -63,7 +70,7 @@ export class WishesService {
     }
   }
 
-  async findOne(params: FindManyOptions<Wish>) {
+  async findOne(params: FindManyOptions<Wish>): Promise<Wish> {
     try {
       return await this.wishesRepository.findOneOrFail(params);
     } catch (error) {
@@ -73,11 +80,15 @@ export class WishesService {
     }
   }
 
-  async findMany(params: FindManyOptions<Wish>) {
+  async findMany(params: FindManyOptions<Wish>): Promise<Wish[]> {
     return await this.wishesRepository.find(params);
   }
 
-  async update(userId: number, wishId: number, updateWishDto: UpdateWishesDto) {
+  async update(
+    userId: number,
+    wishId: number,
+    updateWishDto: UpdateWishesDto,
+  ): Promise<UpdateResult> {
     const wish = await this.wishesRepository.findOneOrFail({
       where: { id: wishId },
       relations: { offers: true, owner: true },
@@ -93,7 +104,7 @@ export class WishesService {
     return await this.wishesRepository.update(wishId, updateWishDto);
   }
 
-  async remove(wishId: number, userId: number) {
+  async remove(wishId: number, userId: number): Promise<DeleteResult> {
     const wish = await this.wishesRepository.findOne({
       where: { id: wishId },
       relations: {

@@ -1,3 +1,4 @@
+import { User } from "@/users/entities/users.entity";
 import { UsersService } from "@/users/users.service";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
@@ -17,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(jwtPayload: { id: number }) {
+  async validate(jwtPayload: { id: number }): Promise<User> {
     const user = await this.usersService.findOne({
       where: { id: jwtPayload.id },
     });
