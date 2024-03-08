@@ -28,6 +28,10 @@ export class WishesService {
     userId: number,
     createWishesDto: CreateWishesDto,
   ): Promise<Wish> {
+    if (createWishesDto.price < 1 || createWishesDto.price > 100000)
+      throw new ForbiddenException(
+        "Цена должна быть больше 0₽ и меньше 100000₽",
+      );
     const wish = await this.wishesRepository.save({
       ...createWishesDto,
       owner: { id: userId },
